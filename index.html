@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bon Miel – Miel naturel artisanal d'exception. Commandez en ligne, livraison à Abidjan.">
+    <title>Bon Miel — Miel Naturel & Artisanal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── TOAST NOTIFICATIONS ── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── CART SIDEBAR ── -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <h3><i class='bx bx-cart'></i> Mon Panier <span class="cart-count-badge" id="cartCountBadge">0</span></h3>
+        <button class="cart-close" id="cartClose"><i class='bx bx-x'></i></button>
+    </div>
+    <div class="cart-body" id="cartBody">
+        <div class="cart-empty" id="cartEmpty">
+            <i class='bx bx-cart-alt'></i>
+            <p>Votre panier est vide</p>
+        </div>
+        <ul class="cart-items" id="cartItems"></ul>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+        <div class="cart-total">
+            <span>Total</span>
+            <strong id="cartTotal">0 FCFA</strong>
+        </div>
+        <button class="btn-checkout" id="btnCheckout">
+            <i class='bx bx-credit-card'></i> Commander
+        </button>
+    </div>
+</aside>
+
+<!-- ── CHECKOUT MODAL ── -->
+<div class="modal-overlay" id="checkoutOverlay">
+    <div class="modal checkout-modal">
+        <button class="modal-close" id="checkoutClose"><i class='bx bx-x'></i></button>
+        <h2>Finaliser la commande</h2>
+        <div class="checkout-summary" id="checkoutSummary"></div>
+        <form class="checkout-form" id="checkoutForm" novalidate>
+            <div class="form-row">
+                <div class="field">
+                    <label>Prénom & Nom *</label>
+                    <input type="text" id="co-name" placeholder="Jean Kouamé" required>
+                </div>
+                <div class="field">
+                    <label>Téléphone *</label>
+                    <input type="tel" id="co-phone" placeholder="07 00 00 00 00" required>
+                </div>
+            </div>
+            <div class="field">
+                <label>Adresse de livraison *</label>
+                <input type="text" id="co-address" placeholder="Cocody, Rue des Jardins..." required>
+            </div>
+            <div class="field">
+                <label>Commune *</label>
+                <select id="co-commune" required>
+                    <option value="">Choisir une commune...</option>
+                    <option>Cocody</option><option>Plateau</option><option>Marcory</option>
+                    <option>Treichville</option><option>Adjamé</option><option>Abobo</option>
+                    <option>Yopougon</option><option>Koumassi</option><option>Port-Bouët</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Mode de paiement</label>
+                <div class="payment-methods">
+                    <label class="pay-opt active"><input type="radio" name="pay" value="cash" checked> <i class='bx bx-money'></i> Paiement à la livraison</label>
+                    <label class="pay-opt"><input type="radio" name="pay" value="wave"> <i class='bx bx-mobile-alt'></i> Wave / Orange Money</label>
+                </div>
+            </div>
+            <div class="field" id="waveField" style="display:none">
+                <label>Numéro Wave / OM</label>
+                <input type="tel" id="co-wave" placeholder="07 00 00 00 00">
+            </div>
+            <button type="submit" class="btn-submit-order">
+                <i class='bx bx-check-circle'></i> Confirmer la commande
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ── ORDER SUCCESS MODAL ── -->
+<div class="modal-overlay" id="successOverlay">
+    <div class="modal success-modal">
+        <div class="success-icon"><i class='bx bx-check-circle'></i></div>
+        <h2>Commande confirmée !</h2>
+        <p id="successMsg"></p>
+        <p class="success-sub">Nous vous contacterons sous 30 minutes pour confirmer la livraison.</p>
+        <div class="success-contact">
+            <a href="tel:+2250713188565" class="btn-call"><i class='bx bx-phone'></i> Nous appeler</a>
+            <a href="https://wa.me/2250713188565" target="_blank" class="btn-wa"><i class='bx bxl-whatsapp'></i> WhatsApp</a>
+        </div>
+        <button class="btn-close-success" id="closeSuccess">Fermer</button>
+    </div>
+</div>
+
+<!-- ── PRODUCT DETAIL MODAL ── -->
+<div class="modal-overlay" id="productOverlay">
+    <div class="modal product-modal" id="productModal">
+        <button class="modal-close" id="productClose"><i class='bx bx-x'></i></button>
+        <div class="product-modal-content" id="productModalContent"></div>
+    </div>
+</div>
+
+<!-- ── HEADER ── -->
+<header id="header">
+    <a href="#home" class="logo">
+        <span class="logo-icon"></span>
+        <span class="logo-text"><b>Bon</b>Miel</span>
+    </a>
+
+    <nav class="navlist" id="navlist">
+        <a href="#home" class="nav-link active" data-nav="home">Accueil</a>
+        <a href="#about" class="nav-link" data-nav="about">À propos</a>
+        <a href="#shop" class="nav-link" data-nav="shop">Produits</a>
+        <a href="#review" class="nav-link" data-nav="review">Avis</a>
+        <a href="#contact" class="nav-link" data-nav="contact">Contact</a>
+    </nav>
+
+    <div class="header-actions">
+        <button class="action-btn search-toggle" id="searchToggle" title="Rechercher">
+            <i class='bx bx-search'></i>
+        </button>
+        <button class="action-btn wishlist-btn" id="wishlistToggle" title="Favoris">
+            <i class='bx bx-heart'></i>
+            <span class="badge" id="wishBadge" style="display:none">0</span>
+        </button>
+        <button class="action-btn cart-btn" id="cartToggle" title="Panier">
+            <i class='bx bx-cart'></i>
+            <span class="badge" id="cartBadge" style="display:none">0</span>
+        </button>
+        <div class="menu-icon" id="menuIcon"><i class='bx bx-menu'></i></div>
+    </div>
+</header>
+
+<!-- ── SEARCH BAR ── -->
+<div class="search-bar-container" id="searchBar">
+    <div class="search-inner">
+        <i class='bx bx-search'></i>
+        <input type="text" id="searchInput" placeholder="Rechercher un miel...">
+        <button id="searchClose"><i class='bx bx-x'></i></button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════
+     HOME
+════════════════════════════════ -->
+<section class="home" id="home">
+    <div class="home-bg-blob"></div>
+    <div class="home-content">
+        <div class="home-label">🌿 100% Naturel · Artisanal</div>
+        <h1>Rencontrez le vrai<br><span>goût du miel</span><br>d'exception</h1>
+        <p>Directement des ruchers d'Afrique à votre table. Un miel pur, riche en bienfaits, récoltées par nos apiculteurs.</p>
+        <div class="home-actions">
+            <a href="#shop" class="btn-primary">
+                <i class='bx bx-store'></i> Découvrir nos miels
+            </a>
+            <a href="#about" class="btn-ghost">En savoir plus</a>
+        </div>
+        <div class="home-stats">
+            <div class="h-stat"><strong>100%</strong><span>Naturel</span></div>
+            <div class="h-sep"></div>
+            <div class="h-stat"><strong>500+</strong><span>Clients</span></div>
+            <div class="h-sep"></div>
+            <div class="h-stat"><strong>48h</strong><span>Livraison</span></div>
+        </div>
+    </div>
+    <div class="home-visual">
+        <div class="hero-jar-wrap">
+            <img src="image/hero.png" alt="Miel artisanal" class="hero-img">
+            <div class="hero-badge badge-top">
+                <i class='bx bx-leaf'></i> Bio & Pur
+            </div>
+            <div class="hero-badge badge-bottom">
+                <i class='bx bx-star'></i> 4.9/5 · 200+ avis
+            </div>
+        </div>
+    </div>
+    <a href="#about" class="scroll-down"><i class='bx bx-chevron-down'></i></a>
+</section>
+
+<!-- ════════════════════════════════
+     HIGHLIGHTS BAND
+════════════════════════════════ -->
+<section class="highlights">
+    <div class="hl-item">
+        <i class='bx bx-leaf'></i>
+        <div><strong>100% Naturel</strong><span>Sans additifs</span></div>
+    </div>
+    <div class="hl-item">
+        <i class='bx bx-package'></i>
+        <div><strong>Livraison Abidjan</strong><span>Sous 48h</span></div>
+    </div>
+    <div class="hl-item">
+        <i class='bx bx-shield-quarter'></i>
+        <div><strong>Qualité garantie</strong><span>Satisfaction ou remboursé</span></div>
+    </div>
+    <div class="hl-item">
+        <i class='bx bx-support'></i>
+        <div><strong>Support 7j/7</strong><span>WhatsApp disponible</span></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════
+     ABOUT
+════════════════════════════════ -->
+<section class="about" id="about">
+    <div class="about-visual">
+        <div class="about-img-frame">
+            <img src="image/about.png" alt="Nos apiculteurs">
+        </div>
+        <div class="about-badge-years">
+            <strong>5+</strong><span>ans d'expertise</span>
+        </div>
+    </div>
+    <div class="about-content">
+        <span class="section-tag">Notre histoire</span>
+        <h2>Bien vivre commence<br>par <em>bien manger.</em></h2>
+        <p>Depuis 2019, <strong>Bon Miel</strong> sélectionne les meilleurs miels d'Afrique de l'Ouest. Nos apiculteurs partenaires récoltent à la main, sans chauffage ni filtration excessive, pour préserver tous les nutriments et arômes naturels.</p>
+        <div class="about-features">
+            <div class="af-item"><i class='bx bx-check'></i> Récolte manuelle</div>
+            <div class="af-item"><i class='bx bx-check'></i> Sans conservateurs</div>
+            <div class="af-item"><i class='bx bx-check'></i> Certifié naturel</div>
+            <div class="af-item"><i class='bx bx-check'></i> Traçabilité totale</div>
+        </div>
+        <a href="#shop" class="btn-primary">Voir nos produits</a>
+    </div>
+</section>
+
+<!-- ════════════════════════════════
+     SHOP
+════════════════════════════════ -->
+<section class="shop" id="shop">
+    <div class="section-header">
+        <span class="section-tag">Nos produits</span>
+        <h2>Découvrez notre <em>collection</em></h2>
+        <p>Des miels rares et savoureux, issus des meilleures ruches d'Afrique.</p>
+    </div>
+
+    <!-- Filtres -->
+    <div class="shop-filters">
+        <button class="filter-btn active" data-cat="all">Tous</button>
+        <button class="filter-btn" data-cat="floral">Floral</button>
+        <button class="filter-btn" data-cat="foret">Forêt</button>
+        <button class="filter-btn" data-cat="premium">Premium</button>
+        <button class="filter-btn" data-cat="bio">Bio</button>
+    </div>
+
+    <!-- Résultats de recherche -->
+    <div class="search-results-info" id="searchInfo" style="display:none">
+        <i class='bx bx-search'></i>
+        <span id="searchInfoText"></span>
+        <button id="clearSearch">Effacer</button>
+    </div>
+
+    <!-- Grille produits -->
+    <div class="shop-grid" id="shopGrid"></div>
+
+    <div class="shop-empty" id="shopEmpty" style="display:none">
+        <i class='bx bx-search-alt'></i>
+        <p>Aucun produit trouvé</p>
+        <button class="btn-ghost" id="resetFilters">Réinitialiser les filtres</button>
+    </div>
+</section>
+
+<!-- ════════════════════════════════
+     WISHLIST SECTION (dynamique)
+════════════════════════════════ -->
+<section class="wishlist-section" id="wishlistSection" style="display:none">
+    <div class="section-header">
+        <span class="section-tag">❤️ Mes Favoris</span>
+        <h2>Produits sauvegardés</h2>
+    </div>
+    <div class="shop-grid" id="wishlistGrid"></div>
+</section>
+
+<!-- ════════════════════════════════
+     REVIEWS
+════════════════════════════════ -->
+<section class="review" id="review">
+    <div class="section-header">
+        <span class="section-tag">Témoignages</span>
+        <h2>Ce que disent nos <em>clients</em></h2>
+    </div>
+
+    <div class="reviews-slider-wrapper">
+        <button class="slider-arrow left" id="prevReview"><i class='bx bx-chevron-left'></i></button>
+        <div class="reviews-slider" id="reviewsSlider"></div>
+        <button class="slider-arrow right" id="nextReview"><i class='bx bx-chevron-right'></i></button>
+    </div>
+    <div class="slider-dots" id="sliderDots"></div>
+
+    <!-- Formulaire d'avis -->
+    <div class="review-form-wrapper">
+        <h3><i class='bx bx-edit'></i> Laisser un avis</h3>
+        <form class="review-form" id="reviewForm">
+            <div class="form-row">
+                <div class="field">
+                    <input type="text" id="rv-name" placeholder="Votre nom" required>
+                </div>
+                <div class="field">
+                    <input type="text" id="rv-job" placeholder="Votre profession (optionnel)">
+                </div>
+            </div>
+            <div class="field">
+                <textarea id="rv-text" rows="3" placeholder="Votre avis sur nos produits..." required></textarea>
+            </div>
+            <div class="star-rating-input" id="starInput">
+                <span>Note :</span>
+                <i class='bx bxs-star' data-star="1"></i>
+                <i class='bx bxs-star' data-star="2"></i>
+                <i class='bx bxs-star' data-star="3"></i>
+                <i class='bx bxs-star' data-star="4"></i>
+                <i class='bx bxs-star' data-star="5"></i>
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class='bx bx-send'></i> Publier mon avis
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- ════════════════════════════════
+     CONTACT
+════════════════════════════════ -->
+<section class="contact" id="contact">
+    <div class="contact-grid">
+        <!-- Infos -->
+        <div class="contact-info">
+            <span class="section-tag">Contact</span>
+            <h2>Parlons de votre<br><em>commande</em></h2>
+            <p>Disponibles du lundi au samedi de 8h à 19h. Réponse garantie sous 2h.</p>
+            <div class="contact-channels">
+                <a href="tel:+2250713188565" class="channel">
+                    <div class="channel-icon"><i class='bx bx-phone'></i></div>
+                    <div><strong>Téléphone</strong><span>+225 07 13 18 85 65</span></div>
+                </a>
+                <a href="https://wa.me/2250713188565" target="_blank" class="channel">
+                    <div class="channel-icon wa"><i class='bx bxl-whatsapp'></i></div>
+                    <div><strong>WhatsApp</strong><span>Message instantané</span></div>
+                </a>
+                <div class="channel">
+                    <div class="channel-icon loc"><i class='bx bx-map-pin'></i></div>
+                    <div><strong>Adresse</strong><span>Maison du Miel · Cocody, Abidjan</span></div>
+                </div>
+                <div class="channel">
+                    <div class="channel-icon hr"><i class='bx bx-time'></i></div>
+                    <div><strong>Horaires</strong><span>Lun–Sam · 08h00 – 19h00</span></div>
+                </div>
+            </div>
+            <div class="socials">
+                <a href="#" title="Instagram"><i class='bx bxl-instagram-alt'></i></a>
+                <a href="#" title="Facebook"><i class='bx bxl-facebook'></i></a>
+                <a href="#" title="TikTok"><i class='bx bxl-tiktok'></i></a>
+            </div>
+        </div>
+
+        <!-- Formulaire de contact -->
+        <div class="contact-form-card">
+            <h3><i class='bx bx-envelope'></i> Envoyer un message</h3>
+            <form id="contactForm" novalidate>
+                <div class="form-row">
+                    <div class="field">
+                        <input type="text" id="cf-name" placeholder="Votre nom *" required>
+                        <span class="field-err" id="cf-name-err"></span>
+                    </div>
+                    <div class="field">
+                        <input type="email" id="cf-email" placeholder="Email *" required>
+                        <span class="field-err" id="cf-email-err"></span>
+                    </div>
+                </div>
+                <div class="field">
+                    <input type="text" id="cf-subject" placeholder="Sujet *" required>
+                    <span class="field-err" id="cf-subject-err"></span>
+                </div>
+                <div class="field">
+                    <textarea id="cf-message" rows="4" placeholder="Votre message..." required></textarea>
+                    <span class="field-err" id="cf-message-err"></span>
+                </div>
+                <button type="submit" class="btn-primary full">
+                    <i class='bx bxl-whatsapp'></i> Envoyer via WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+    <div class="footer-top">
+        <div class="footer-brand">
+            <a href="#home" class="logo"><span class="logo-icon">🍯</span><span class="logo-text"><b>Bon</b>Miel</span></a>
+            <p>Le miel naturel d'Afrique directement chez vous, à Abidjan.</p>
+            <div class="socials">
+                <a href="#"><i class='bx bxl-instagram-alt'></i></a>
+                <a href="#"><i class='bx bxl-facebook'></i></a>
+                <a href="#"><i class='bx bxl-tiktok'></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <h4>Navigation</h4>
+            <a href="#home">Accueil</a>
+            <a href="#about">À propos</a>
+            <a href="#shop">Produits</a>
+            <a href="#review">Avis clients</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <div class="footer-links">
+            <h4>Produits</h4>
+            <a href="#" data-filter-link="floral">Miels floraux</a>
+            <a href="#" data-filter-link="foret">Miels de forêt</a>
+            <a href="#" data-filter-link="premium">Collection Premium</a>
+            <a href="#" data-filter-link="bio">Gamme Bio</a>
+        </div>
+        <div class="footer-newsletter">
+            <h4>Newsletter</h4>
+            <p>Recevez nos offres et nouveautés.</p>
+            <form class="nl-form" id="nlForm">
+                <input type="email" id="nl-email" placeholder="votre@email.com">
+                <button type="submit"><i class='bx bx-send'></i></button>
+            </form>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2025 <strong>Bon Miel</strong> · Abidjan, Côte d'Ivoire</p>
+        <a href="#home" class="back-top"><i class='bx bx-up-arrow-alt'></i></a>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
